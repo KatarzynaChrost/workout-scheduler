@@ -26,7 +26,7 @@ export default function Home() {
     firstName: "",
     lastName: "",
     email: "",
-    age: null,
+    age: 8,
     file: null,
   });
 

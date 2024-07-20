@@ -19,10 +19,10 @@ const PersonalInfo = ({ onChange }: IPersonalInfo) => {
     const { name, value, files } = e.currentTarget;
 
     if (name === "file" && files) {
+      console.log(files[0]);
       setCurrentFileName(files[0]?.name || undefined);
       onChange("file", files[0]);
-    }
-    if (name === "email") {
+    } else if (name === "email") {
       if (!emailRegex.test(value)) {
         setError(true);
       } else {

@@ -1,6 +1,7 @@
 import { FormDataType } from "../page";
 
 export const formSubmit = async (data: FormDataType) => {
+  console.log(data.file);
   if (!data.age || !data.file || !data.date) return;
 
   const formData = new FormData();
