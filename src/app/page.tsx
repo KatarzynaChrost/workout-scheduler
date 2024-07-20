@@ -47,11 +47,17 @@ export default function Home() {
     setIsSubmitDisabled(!(isPersonalInfoFilled && isWorkoutInfoFilled));
   }, [personalInfo, workoutInfo]);
 
-  const handlePersonalInfoChange = (key, value) => {
+  const handlePersonalInfoChange = (
+    key: string,
+    value: string | number | File | null
+  ) => {
     setPersonalInfo({ ...personalInfo, [key]: value });
   };
 
-  const handleWorkoutInfoChange = (key, value) => {
+  const handleWorkoutInfoChange = (
+    key: string,
+    value: Date | string | null
+  ) => {
     setWorkoutInfo({ ...workoutInfo, [key]: value });
   };
 
