@@ -1,22 +1,25 @@
 "use client";
 
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import LabeledInput from "../atoms/LabeledInput";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import clsx from "clsx";
-import { IHolidayResponseData, getHolidays } from "@/app/actions/holidays";
+import { getHolidays } from "@/app/actions/holidays";
+import infoSvg from "../../img/svg/info.svg";
+import Image from "next/image";
 
 interface IWorkoutInfo {
   onChange: (key: string, value: Date | string | null) => void;
 }
 
 const WorkoutInfo = ({ onChange }: IWorkoutInfo) => {
-  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [startDate, setStartDate] = useState<Date | null>(null);
   const [nationalHolidays, setNationalHolidays] = useState<Date[]>();
   const [observanceHolidays, setObservanceHolidays] =
-    useState<IHolidayResponseData>();
+    useState<{ date: string; holidayName: string }[]>();
   const [selectedSlot, setSelectedSlot] = useState<string>("");
+  const [holidayInfo, setHolidayInfo] = useState<string>("");
 
   const handleSlotSelect = (hour: string) => {
     setSelectedSlot(hour);
@@ -41,7 +44,14 @@ const WorkoutInfo = ({ onChange }: IWorkoutInfo) => {
       type: "OBSERVANCE",
     }).then((response) => {
       if (response.success) {
-        setObservanceHolidays(response.data);
+        setObservanceHolidays(
+          response.data?.map((holiday) => {
+            return {
+              date: holiday.date,
+              holidayName: holiday.name,
+            };
+          })
+        );
       }
     });
   }, []);
@@ -49,6 +59,26 @@ const WorkoutInfo = ({ onChange }: IWorkoutInfo) => {
   const handleDateChange = async (date: Date | null) => {
     setStartDate(date);
     onChange("date", date);
+
+    if (!date) {
+      return;
+    }
+
+    const observanceHoliday = observanceHolidays?.find((holiday) => {
+      const convertedToDate = new Date(holiday.date);
+
+      return (
+        convertedToDate.getDate() === date.getDate() &&
+        convertedToDate.getMonth() === date.getMonth() &&
+        convertedToDate.getFullYear() === date.getFullYear()
+      );
+    });
+
+    if (observanceHoliday) {
+      setHolidayInfo(observanceHoliday.holidayName);
+    } else {
+      setHolidayInfo("");
+    }
   };
 
   const isWeekday = (date: Date) => {
@@ -67,41 +97,52 @@ const WorkoutInfo = ({ onChange }: IWorkoutInfo) => {
     return isCurrentCalendarDateHoliday;
   };
 
-  const isWorkday = (date: Date) => {
-    return isWeekday(date) && !isNationalHoliday(date);
-  };
+  const isWorkday = (date: Date) => isWeekday(date) && !isNationalHoliday(date);
 
   const timeSlots = ["12:00", "14:00", "16:30", "18:30", "20:00"];
 
   return (
     <>
       <h2 className="section-title mt-8">Your workout</h2>
-      <LabeledInput label="Date">
-        <div className="custom-date-picker">
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => handleDateChange(date)}
-            minDate={new Date()}
-            inline
-            filterDate={isWorkday}
-            peekNextMonth={false}
-            calendarStartDay={1}
-          />
-        </div>
-      </LabeledInput>
-      <LabeledInput label="Time">
-        <div className="flex flex-wrap gap-2">
-          {timeSlots.map((hour, i) => (
-            <button
-              className={clsx("time-slot", { selected: selectedSlot === hour })}
-              key={i}
-              onClick={() => handleSlotSelect(hour)}
-            >
-              {hour}
-            </button>
-          ))}
-        </div>
-      </LabeledInput>
+      <div className="grid xs:grid-cols-[auto_1fr] gap-2 w-full">
+        <LabeledInput label="Date">
+          <div className="custom-date-picker">
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => handleDateChange(date)}
+              minDate={new Date()}
+              inline
+              filterDate={isWorkday}
+              peekNextMonth={false}
+              calendarStartDay={1}
+              holidays={observanceHolidays || []}
+            />
+          </div>
+          {holidayInfo && (
+            <div className="flex gap-2">
+              <Image src={infoSvg} width={16} height={16} alt="info" />
+              <p className="text-sm">It is {holidayInfo}.</p>
+            </div>
+          )}
+        </LabeledInput>
+        {!!startDate && (
+          <LabeledInput label="Time">
+            <div className="flex flex-wrap gap-2">
+              {timeSlots.map((hour, i) => (
+                <button
+                  className={clsx("time-slot", {
+                    selected: selectedSlot === hour,
+                  })}
+                  key={i}
+                  onClick={() => handleSlotSelect(hour)}
+                >
+                  {hour}
+                </button>
+              ))}
+            </div>
+          </LabeledInput>
+        )}
+      </div>
     </>
   );
 };

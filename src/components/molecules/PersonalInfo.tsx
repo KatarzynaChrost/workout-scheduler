@@ -3,13 +3,16 @@
 import { ChangeEvent, MouseEvent, useRef, useState } from "react";
 import AgeRangeInput from "../atoms/AgeRangeInput/AgeRangeInput";
 import LabeledInput from "../atoms/LabeledInput";
+import clsx from "clsx";
 
 interface IPersonalInfo {
   onChange: (key: string, value: string | number | File | null) => void;
 }
+const emailRegex = /^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/;
 
 const PersonalInfo = ({ onChange }: IPersonalInfo) => {
   const [currentFileName, setCurrentFileName] = useState<string | undefined>();
+  const [error, setError] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
@@ -18,6 +21,14 @@ const PersonalInfo = ({ onChange }: IPersonalInfo) => {
     if (name === "file" && files) {
       setCurrentFileName(files[0]?.name || undefined);
       onChange("file", files[0]);
+    }
+    if (name === "email") {
+      if (!emailRegex.test(value)) {
+        setError(true);
+      } else {
+        setError(false);
+      }
+      onChange("email", value);
     } else {
       onChange(name, value);
     }
@@ -40,7 +51,6 @@ const PersonalInfo = ({ onChange }: IPersonalInfo) => {
           type="text"
           name="firstName"
           onChange={handleChange}
-          required
         />
       </LabeledInput>
       <LabeledInput label="Last Name">
@@ -49,17 +59,21 @@ const PersonalInfo = ({ onChange }: IPersonalInfo) => {
           type="text"
           name="lastName"
           onChange={handleChange}
-          required
         />
       </LabeledInput>
       <LabeledInput label="Email Address">
         <input
-          className="input-subtle"
+          className={clsx("input-subtle", { "error-input": error })}
           type="email"
           name="email"
           onChange={handleChange}
-          required
         />
+        {error && (
+          <div className="error-message">
+            Please use correct formatting.
+            <br /> Example: address@email.com
+          </div>
+        )}
       </LabeledInput>
       <LabeledInput label="Age">
         <AgeRangeInput onChange={(age) => onChange("age", age)} />
@@ -73,6 +87,7 @@ const PersonalInfo = ({ onChange }: IPersonalInfo) => {
           onChange={(event) => handleChange(event)}
           ref={fileInputRef}
           accept="image/jpeg, image/png"
+          draggable
         />
         <label htmlFor="file">
           <div className={currentFileName ? "uploaded-file" : "upload-text"}>

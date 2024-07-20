@@ -102,6 +102,15 @@ body {
       font-size: medium;
       margin: 6px;
     }
+
+    .react-datepicker__navigation {
+      top: 16px;
+      color: var(--accent-muted);
+    }
+
+    .react-datepicker__day--holidays {
+      background-color: unset;
+    }
   }
 }
 
@@ -123,6 +132,18 @@ body {
 
     &.selected {
       @apply border-accent shadow-1px;
+    }
+  }
+
+  .error-input {
+    @apply border-2 border-error focus:outline-none focus:ring-0 focus:border-error focus:shadow-none bg-error-muted;
+  }
+
+  .error-message {
+    @apply text-sm relative ml-6;
+    &::before {
+      content: url("../img/svg/error.svg");
+      @apply absolute top-[4px] -left-[23px] w-5 h-5;
     }
   }
 }

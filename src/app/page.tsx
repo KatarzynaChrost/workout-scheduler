@@ -66,7 +66,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 max-w-96 mx-auto">
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 max-w-[426px] mx-auto">
       <PersonalInfo onChange={handlePersonalInfoChange} />
       <WorkoutInfo onChange={handleWorkoutInfoChange} />
       <Button

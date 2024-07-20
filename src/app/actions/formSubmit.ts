@@ -8,7 +8,7 @@ export const formSubmit = async (data: FormDataType) => {
   formData.append("lastName", data.lastName);
   formData.append("email", data.email);
   formData.append("age", data.age.toString());
-  formData.append("file", data.file);
+  formData.append("file", data.file, data.file.name);
   formData.append("date", data.date.toString());
   formData.append("time", data.time);
 
